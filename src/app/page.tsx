@@ -1,95 +1,90 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import { Box } from "@mui/material";
+
+import { ArrowRight, ArrowLeft } from "@mui/icons-material"
+import { useQuery } from "@tanstack/react-query";
+import { Product } from "@/types";
+
+import Slide from "@/components/Slide";
+import React from "react";
 
 export default function Home() {
+  
+  const getData = () => {
+    return fetch('https://fakestoreapi.com/products')
+      .then(response => response.json());
+  };
+  
+  const { data, isLoading, error } = useQuery<Product[]>({ queryKey: ['products'], queryFn: getData })
+  
+  const CustomPrevArrow = (props) => {
+    return (
+      <ArrowLeft
+        sx={{ color: '#fff', position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', zIndex: 1, cursor: 'pointer' }}
+        fontSize="large"
+        onClick={props.onClick}
+      />
+    )
+  };
+  
+  const CustomNextArrow = (props) => {
+    return (
+      <ArrowRight
+        sx={{ color: '#fff', position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', zIndex: 1, cursor: 'pointer' }}
+        fontSize="large"
+        onClick={props.onClick}
+      />
+    );
+  };
+  
+  const settings = {
+    infinite: true,
+    speed: 500,
+    slidesToShow: 4,
+    slidesToScroll: 3,
+    prevArrow: <CustomPrevArrow />,
+    nextArrow: <CustomNextArrow />,
+    responsive: [
+      {
+        breakpoint: 1220,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 2,
+        },
+      },
+      {
+        breakpoint: 920,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+    ],
+  };
+  
+  if (isLoading) return <div>...loading</div>
+  if (error) return <div> something went wrong </div>
+  
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+    <main>
+      <Box sx={{ margin: '0 auto' }}>
+        <Slider {...settings}>
+          { !isLoading && !error && data?.map((product) => {
+            return (
+              <Slide
+                key={product.id}
+                product={product}
+              />
+            )
+          }) }
+        </Slider>
+      </Box>
+      
     </main>
   )
 }
+
+
